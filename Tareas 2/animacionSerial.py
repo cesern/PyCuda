@@ -31,7 +31,7 @@ r2 = r**2
 u0 = np.array([ [ (Thot if ((i*dx-cx)**2 + (j*dy-cy)**2) < r2 else Tcool) for i in range(nx) ] for j in range(ny) ])
 u = np.array([ [0 for i in range(nx)] for i in range(ny) ]) 
 # Number of timesteps
-nsteps = 10
+nsteps = 500
 ####ESTE QUEDO PARA GRAFICAR
 #Esta funcion lo uqe hace es meterle la matriz a la animacion
 def animate(data, im):
@@ -39,7 +39,7 @@ def animate(data, im):
 #funcion que "genera" los datos
 def step(u0,u):
     i=0
-    while i<10:
+    while i<1000:
         u0, data = do_timestep(u0, u)
         i+=1
         yield data
@@ -60,4 +60,4 @@ ani = animation.FuncAnimation(
     fig, animate, step(u0,u), interval=1, repeat=True,repeat_delay=1, fargs=(im,))
 #plt.show()
 #ani.save("test.mp4", fps=10)
-ani.save('animation.gif')
+ani.save('animation.mp4', fps=20, writer="ffmpeg", codec="libx264")
