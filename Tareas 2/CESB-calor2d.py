@@ -29,40 +29,48 @@ mod = SourceModule("""
     }
 """)
 
-if __name__ == "__main__":
-    # obtener kernel
-    kernelCalor2D = mod.get_function("kernelCalor2D")
-    # Initial conditions - ring of inner radius r, width dr centred at (cx,cy) (mm)
-    r, cx, cy = 3, 5, 5 
-    r2 = r**2
+# obtener el kernel
+kernelCalor2D = mod.get_function("kernelCalor2D")
+# Initial conditions - ring of inner radius r, width dr centred at (cx,cy) (mm)
+r, cx, cy = 3, 5, 5 
+r2 = r**2
+"""
+a0 = [ (Thot if ((i*dx-cx)**2 + (j*dy-cy)**2) < r2 else Tcool) for i in range(nx) for j in range(ny) ]
+a = [ 0 for i in range(nx) for i in range(ny) ]
 
-    a0 = [ (Thot if ((i*dx-cx)**2 + (j*dy-cy)**2) < r2 else Tcool) for i in range(nx) for j in range(ny) ]
-    a = [ 0 for i in range(nx) for i in range(ny) ]
+u0 = np.array(a0).astype(np.float32)
+u = np.array(a).astype(np.float32)
+"""
+u0 = Tcool * np.ones((nx, ny)).astype(np.float32) 
+u = np.empty((nx, ny)).astype(np.float32) 
 
-    u0 = np.array(a0).astype(np.float32)
-    u = np.array(a).astype(np.float32)
-    # Number of timesteps
-    nsteps = 50
-    # Output 4 figures at these timesteps
-    mfig = [0, 20, 30, 40]
-    fignum = 0
-    fig = plt.figure()
+for i in range(nx):
+    for j in range(ny):
+        p2 = (i*dx-cx)**2 + (j*dy-cy)**2
+        if p2 < r2:
+            u0[i,j] = Thot
+# Number of timesteps
+nsteps = 101
+# Output 4 figures at these timesteps
+mfig = [0, 30, 75, 100]
+fignum = 0
+fig = plt.figure()
 
-    for m in range(nsteps):
-        # kernel
-        kernelCalor2D(cuda.In(u0), cuda.Out(u), 
-            block=(threads_per_block, threads_per_block, 1), grid=(nx//threads_per_block, ny//threads_per_block, 1) )
-        u0 = u.copy()
-        if m in mfig:
-            fignum += 1
-            print(m, fignum)
-            ax = fig.add_subplot(220 + fignum)
-            im = ax.imshow(u.reshape((nx,ny)).copy(), cmap=plt.get_cmap('hot'), vmin=Tcool,vmax=Thot)
-            ax.set_axis_off()
-            ax.set_title('{:.1f} ms'.format(m*dt*1000))
+for m in range(nsteps):
+    # kernel
+    kernelCalor2D(cuda.In(u0), cuda.Out(u), 
+        block=(threads_per_block, threads_per_block, 1), grid=(nx//threads_per_block, ny//threads_per_block, 1) )
+    u0 = u.copy()
+    if m in mfig:
+        fignum += 1
+        print(m, fignum)
+        ax = fig.add_subplot(220 + fignum)
+        im = ax.imshow(u.reshape((nx,ny)).copy(), cmap=plt.get_cmap('hot'), vmin=Tcool,vmax=Thot)
+        ax.set_axis_off()
+        ax.set_title('{:.1f} ms'.format(m*dt*1000))
 
-    fig.subplots_adjust(right=0.85)
-    cbar_ax = fig.add_axes([0.9, 0.15, 0.03, 0.7])
-    cbar_ax.set_xlabel('$T$ / K', labelpad=20)
-    fig.colorbar(im, cax=cbar_ax)
-    plt.savefig('calor.png') 
+fig.subplots_adjust(right=0.85)
+cbar_ax = fig.add_axes([0.9, 0.15, 0.03, 0.7])
+cbar_ax.set_xlabel('$T$ / K', labelpad=20)
+fig.colorbar(im, cax=cbar_ax)
+plt.savefig('calor.png') 
