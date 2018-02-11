@@ -1,0 +1,13 @@
+#!/bin/bash
+
+#SBATCH -n 1
+#SBATCH --partition=visualizacion
+#SBATCH --gres=gpu:gtx970
+#SBATCH --job-name=CSal
+#SBATCH --time=00:30:00
+
+module load intel/python3
+
+module load cuda/8.0
+
+python calor.py > salida.txt 
