@@ -10,4 +10,4 @@ module load intel/python3
 
 module load cuda/8.0
 
-python calor.py > salida.txt 
+python CESB-calor2d.py > salida.txt 
