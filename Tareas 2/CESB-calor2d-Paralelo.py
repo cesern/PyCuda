@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import pycuda.driver as cuda
 import pycuda.autoinit
 from pycuda.compiler import SourceModule
+import matplotlib.animation as animation
 
 dx = dy = 0.1
 D = 4.
@@ -49,6 +50,9 @@ for i in range(nx):
         p2 = (i*dx-cx)**2 + (j*dy-cy)**2
         if p2 < r2:
             u0[i,j] = Thot
+
+#GeneraIMAGEN   
+"""         
 # Number of timesteps
 nsteps = 101
 # Output 4 figures at these timesteps
@@ -74,3 +78,38 @@ cbar_ax = fig.add_axes([0.9, 0.15, 0.03, 0.7])
 cbar_ax.set_xlabel('$T$ / K', labelpad=20)
 fig.colorbar(im, cax=cbar_ax)
 plt.savefig('calor.png') 
+"""
+####ESTE QUEDO PARA GRAFICAR
+#Esta funcion lo uqe hace es meterle la matriz a la animacion
+def animate(data, im):
+    im.set_data(data)
+#funcion que "genera" los datos
+def step(u0,u):
+    i=0
+    while i<1000:
+        kernelCalor2D(cuda.In(u0), cuda.Out(u), 
+            block=(threads_per_block, threads_per_block, 1), grid=(nx//threads_per_block, ny//threads_per_block, 1) )
+        u0 = u.copy()
+        #u0, data = do_timestep(u0, u)
+        #print(i)
+        i+=1
+        yield u
+#Tdoa la configuracion inicial aqui de la grafica
+fig, ax = plt.subplots()
+fig.subplots_adjust(right=0.85)
+cbar_ax = fig.add_axes([0.9, 0.15, 0.03, 0.7])
+cbar_ax.set_xlabel('$T$ / K', labelpad=20)
+im = ax.imshow(u, cmap=plt.get_cmap('hot'), vmin=Tcool,vmax=Thot)
+fig.colorbar(im, cax=cbar_ax)
+ax.set_axis_off()
+ax.set_title("Mapa de Calor")
+#aqui acaba la configuracion
+"""la siguiente linea hace la animacion
+recibe la figura, la funcion que actualiza, la funcion que genera,
+"""
+ani = animation.FuncAnimation(
+    fig, animate, step(u0,u), interval=1,save_count=1000, repeat=True,repeat_delay=1, fargs=(im,))
+#plt.show()
+ani.save('animationMAX.mp4', fps=20, writer="ffmpeg", codec="libx264")
+
+

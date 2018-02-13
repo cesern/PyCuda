@@ -41,6 +41,7 @@ def step(u0,u):
     i=0
     while i<1000:
         u0, data = do_timestep(u0, u)
+        print(i)
         i+=1
         yield data
 #Tdoa la configuracion inicial aqui de la grafica
@@ -57,7 +58,7 @@ ax.set_title("Mapa de Calor")
 recibe la figura, la funcion que actualiza, la funcion que genera,
 """
 ani = animation.FuncAnimation(
-    fig, animate, step(u0,u), interval=1, repeat=True,repeat_delay=1, fargs=(im,))
+    fig, animate, step(u0,u), interval=1,save_count=1000, repeat=True,repeat_delay=1, fargs=(im,))
 #plt.show()
 #ani.save("test.mp4", fps=10)
-ani.save('animation.mp4', fps=20, writer="ffmpeg", codec="libx264")
+ani.save('animationMAX.mp4', fps=20, writer="ffmpeg", codec="libx264")
