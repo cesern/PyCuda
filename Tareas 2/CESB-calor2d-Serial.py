@@ -25,7 +25,7 @@ def do_timestep(u0, u):
     return u0, u
 
 # Initial conditions - ring of inner radius r, width dr centred at (cx,cy) (mm)
-r, cx, cy = 3, 5, 5 
+r, cx, cy = 4, 5, 5 
 r2 = r**2
 
 u0 = np.array([ [ (Thot if ((i*dx-cx)**2 + (j*dy-cy)**2) < r2 else Tcool) for i in range(nx) ] for j in range(ny) ])
@@ -39,9 +39,8 @@ def animate(data, im):
 #funcion que "genera" los datos
 def step(u0,u):
     i=0
-    while i<1000:
+    while i<100:
         u0, data = do_timestep(u0, u)
-        print(i)
         i+=1
         yield data
 #Tdoa la configuracion inicial aqui de la grafica
