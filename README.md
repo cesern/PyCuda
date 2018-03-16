@@ -1,2 +1,2 @@
 # PyCuda
-Programas de "Seminario de Ciencias Computacionales"
+Programas de Pycuda
